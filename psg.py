@@ -84,7 +84,7 @@ for idx,m in enumerate(msg):
         comments = comments.split('- ')[0].rstrip()  # remove the sender's name that postfixes the inReach message
         # add it to the list
         msgs.append({'sender_number':sender_number, 'sent_date':sent_date, 'sent_time':sent_time, 'callsign':callsign, 'program':program, 'site':site, 'frequency_mhz':frequency_mhz, 'mode':mode, 'comments':comments})
-print(msgs)
+        print(msgs[-1])
 print()
 
 # delete all messages
@@ -96,7 +96,7 @@ print('closing the serial connection')
 gsm_ser.close()
 
 # send the messages to PnP
-print('sending {} messages to PnP'.format(len(msgs)))
+print('sending {} messages to {}'.format(len(msgs), pnp_url))
 for idx,m in enumerate(msgs):
     r = requests.post(pnp_url, json={'actClass':m['program'], 'actCallsign':m['callsign'], 'actSite':['site'], 'mode':m['mode'], 'freq':m['frequency_mhz'], 'comments':m['comments'], 'userID':args.pnp_api_user_name, 'APIKey':args.pnp_api_key})
     if r.status_code == 200:
