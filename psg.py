@@ -19,6 +19,7 @@ parser = argparse.ArgumentParser(description='Receive SMS spot messages and post
 parser.add_argument('-u','--pnp_api_user_name', type=str, help='API user name for the submission.', required=True)
 parser.add_argument('-k','--pnp_api_key', type=str, help='API key for the submission.', required=True)
 parser.add_argument('-url','--pnp_api_url', type=str, help='API URL to use.', required=True)
+parser.add_argument('-debug','--debug_mode', action='store_true', help='Post to PnP as a debug message.')
 args = parser.parse_args()
 
 
@@ -51,6 +52,12 @@ print('set text mode: '.format(getResponse(gsm_ser)))
 # show text mode parameters
 gsm_ser.write('AT+CSDH=1\r'.encode('utf-8'))
 print('show extra parameters: '.format(getResponse(gsm_ser)))
+
+# set the PnP URL
+if args.debug_mode:
+    pnp_url = '{}/DEBUG'.format(args.pnp_api_url)
+else:
+    pnp_url = args.pnp_api_url
 
 # read all messages
 print('reading messages')
@@ -91,7 +98,7 @@ gsm_ser.close()
 # send the messages to PnP
 print('sending {} messages to PnP'.format(len(msgs)))
 for idx,m in enumerate(msgs):
-    r = requests.post(args.pnp_api_url, json={'actClass':m['program'], 'actCallsign':m['callsign'], 'actSite':['site'], 'mode':m['mode'], 'freq':m['frequency_mhz'], 'comments':m['comments'], 'userID':args.pnp_api_user_name, 'APIKey':args.pnp_api_key})
+    r = requests.post(pnp_url, json={'actClass':m['program'], 'actCallsign':m['callsign'], 'actSite':['site'], 'mode':m['mode'], 'freq':m['frequency_mhz'], 'comments':m['comments'], 'userID':args.pnp_api_user_name, 'APIKey':args.pnp_api_key})
     if r.status_code == 200:
         print('message {} was successfully submitted'.format(idx))
     else:
