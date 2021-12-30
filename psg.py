@@ -44,15 +44,15 @@ except:
 
 # check registered on the mobile network
 gsm_ser.write('AT+CREG?\r'.encode('utf-8'))
-print('check registration on the network: '.format(getResponse(gsm_ser)))
+print('check registration on the network: {}'.format(getResponse(gsm_ser)))
 
 # put into text mode
 gsm_ser.write('AT+CMGF=1\r'.encode('utf-8'))
-print('set text mode: '.format(getResponse(gsm_ser)))
+print('set text mode: {}'.format(getResponse(gsm_ser)))
 
 # show text mode parameters
 gsm_ser.write('AT+CSDH=1\r'.encode('utf-8'))
-print('show extra parameters: '.format(getResponse(gsm_ser)))
+print('show extra parameters: {}'.format(getResponse(gsm_ser)))
 
 # set the PnP URL
 if args.debug_mode:
@@ -69,31 +69,38 @@ for idx,m in enumerate(msg):
     m_str = m.rstrip().decode("utf-8")
     if 'CMGL:' in m_str:
         # parse header
-        items = m_str.replace('"','').split(',')
-        sender_number = items[2]
-        sent_date = items[4]
-        sent_time = items[5]
-        # parse body
-        body = msg[idx+1].rstrip().decode("utf-8")
-        items = body.split(' ')
-        callsign = items[0]
-        program = items[1]
-        site = items[2]
-        frequency_mhz = items[3]
-        mode = items[4]
-        comments = " ".join(items[5:])
-        comments = comments.split('- ')[0].rstrip()  # remove the sender's name that postfixes the inReach message
-        if mode in valid_modes:
-            # add it to the list
-            msgs.append({'sender_number':sender_number, 'sent_date':sent_date, 'sent_time':sent_time, 'callsign':callsign, 'program':program, 'site':site, 'frequency_mhz':frequency_mhz, 'mode':mode, 'comments':comments})
-            print('valid message: {}'.format(msgs[-1]))
+        header = m_str.replace('"','')
+        header_items = header.split(',')
+        if len(header_items) >= 6:
+            sender_number = header_items[2]
+            sent_date = header_items[4]
+            sent_time = header_items[5]
+            # parse body
+            body = msg[idx+1].rstrip().decode("utf-8")
+            body_items = body.split(' ')
+            if len(body_items) >= 6:
+                callsign = body_items[0]
+                program = body_items[1]
+                site = body_items[2]
+                frequency_mhz = body_items[3]
+                mode = body_items[4]
+                comments = " ".join(body_items[5:])
+                comments = comments.split('- ')[0].rstrip()  # remove the sender's name that postfixes the inReach message
+                if mode in valid_modes:
+                    # add it to the list
+                    msgs.append({'sender_number':sender_number, 'sent_date':sent_date, 'sent_time':sent_time, 'callsign':callsign, 'program':program, 'site':site, 'frequency_mhz':frequency_mhz, 'mode':mode, 'comments':comments})
+                    print('adding: {}'.format(msgs[-1]))
+                else:
+                    print('invalid message: {}'.format(msgs[-1]))
+            else:
+                print('invalid body: {}'.format(body))
         else:
-            print('invalid message: {}'.format(msgs[-1]))
+            print('invalid header: {}'.format(header))
 print()
 
 # delete all messages
 gsm_ser.write('AT+CMGD=,4\r'.encode('utf-8'))
-print('delete all messages: '.format(getResponse(gsm_ser)))
+print('delete all messages: {}'.format(getResponse(gsm_ser)))
 
 # close the connection
 print('closing the serial connection')
