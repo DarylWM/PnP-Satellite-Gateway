@@ -44,15 +44,15 @@ except:
 
 # check registered on the mobile network
 gsm_ser.write('AT+CREG?\r'.encode('utf-8'))
-print('check registration on the network: {}'.format(getResponse(gsm_ser)))
+print('check registration on the network: {}'.format(getResponse(gsm_ser)[0].rstrip().decode("utf-8")))
 
 # put into text mode
 gsm_ser.write('AT+CMGF=1\r'.encode('utf-8'))
-print('set text mode: {}'.format(getResponse(gsm_ser)))
+print('set text mode: {}'.format(getResponse(gsm_ser)[0].rstrip().decode("utf-8")))
 
 # show text mode parameters
 gsm_ser.write('AT+CSDH=1\r'.encode('utf-8'))
-print('show extra parameters: {}'.format(getResponse(gsm_ser)))
+print('show extra parameters: {}'.format(getResponse(gsm_ser)[0].rstrip().decode("utf-8")))
 
 # set the PnP URL
 if args.debug_mode:
@@ -100,7 +100,7 @@ print()
 
 # delete all messages
 gsm_ser.write('AT+CMGD=,4\r'.encode('utf-8'))
-print('delete all messages: {}'.format(getResponse(gsm_ser)))
+print('delete all messages: {}'.format(getResponse(gsm_ser)[0].rstrip().decode("utf-8")))
 
 # close the connection
 print('closing the serial connection')
