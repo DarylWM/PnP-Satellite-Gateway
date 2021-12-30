@@ -29,7 +29,7 @@ args = parser.parse_args()
 valid_modes = ['SSB','CW','AM','FM','DATA','PSK','RTTY']
 
 # check the users database exists
-USERS_DB_NAME = "{}/users.sqlite".format(args.users_db_dir)
+USERS_DB_NAME = "{}/psg-users.sqlite".format(args.users_db_dir)
 if not os.path.isfile(USERS_DB_NAME):
     print("The users database is required but doesn't exist: {}".format(USERS_DB_NAME))
     sys.exit(1)
