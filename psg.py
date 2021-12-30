@@ -22,6 +22,7 @@ parser.add_argument('-url','--pnp_api_url', type=str, help='API URL to use.', re
 parser.add_argument('-debug','--debug_mode', action='store_true', help='Post to PnP as a debug message.')
 args = parser.parse_args()
 
+valid_modes = ['SSB','CW','AM','FM','DATA','PSK','RTTY']
 
 gsm_ser = serial.Serial()
 gsm_ser.port = '/dev/ttyTHS1'
@@ -82,9 +83,12 @@ for idx,m in enumerate(msg):
         mode = items[4]
         comments = " ".join(items[5:])
         comments = comments.split('- ')[0].rstrip()  # remove the sender's name that postfixes the inReach message
-        # add it to the list
-        msgs.append({'sender_number':sender_number, 'sent_date':sent_date, 'sent_time':sent_time, 'callsign':callsign, 'program':program, 'site':site, 'frequency_mhz':frequency_mhz, 'mode':mode, 'comments':comments})
-        print(msgs[-1])
+        if mode in valid_modes:
+            # add it to the list
+            msgs.append({'sender_number':sender_number, 'sent_date':sent_date, 'sent_time':sent_time, 'callsign':callsign, 'program':program, 'site':site, 'frequency_mhz':frequency_mhz, 'mode':mode, 'comments':comments})
+            print('valid message: {}'.format(msgs[-1]))
+        else:
+            print('invalid message: {}'.format(msgs[-1]))
 print()
 
 # delete all messages
