@@ -44,7 +44,7 @@ except:
 
 # check registered on the mobile network
 gsm_ser.write('AT+CREG?\r'.encode('utf-8'))
-print('check registration on the network: {}'.format(getResponse(gsm_ser)[0].rstrip().decode("utf-8")))
+print('check registration on the network: {}'.format(getResponse(gsm_ser).rstrip().decode("utf-8")))
 
 # put into text mode
 gsm_ser.write('AT+CMGF=1\r'.encode('utf-8'))
