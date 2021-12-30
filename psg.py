@@ -3,6 +3,9 @@ import time
 import sys
 import requests
 import argparse
+import os
+import sqlite3
+import pandas as pd
 
 
 def getResponse(ser):
@@ -19,11 +22,27 @@ parser = argparse.ArgumentParser(description='Receive SMS spot messages and post
 parser.add_argument('-u','--pnp_api_user_name', type=str, help='API user name for the submission.', required=True)
 parser.add_argument('-k','--pnp_api_key', type=str, help='API key for the submission.', required=True)
 parser.add_argument('-url','--pnp_api_url', type=str, help='API URL to use.', required=True)
+parser.add_argument('-db','--users_db_dir', type=str, help='Directory of the users database.', required=True)
 parser.add_argument('-debug','--debug_mode', action='store_true', help='Post to PnP as a debug message.')
 args = parser.parse_args()
 
 valid_modes = ['SSB','CW','AM','FM','DATA','PSK','RTTY']
 
+# check the users database exists
+USERS_DB_NAME = "{}/users.sqlite".format(args.users_db_dir)
+if not os.path.isfile(USERS_DB_NAME):
+    print("The users database is required but doesn't exist: {}".format(USERS_DB_NAME))
+    sys.exit(1)
+
+# load the metrics for the extracted features
+db_conn = sqlite3.connect(USERS_DB_NAME)
+# read the users
+users_df = pd.read_sql_query('select email,token from users', db_conn)
+db_conn.close()
+print("loaded {} users from {}".format(len(users_df), USERS_DB_NAME))
+
+
+# set up the serial connection
 gsm_ser = serial.Serial()
 gsm_ser.port = '/dev/ttyTHS1'
 gsm_ser.baudrate = 115200
@@ -78,20 +97,24 @@ for idx,m in enumerate(msg):
             # parse body
             body = msg[idx+1].rstrip().decode("utf-8")
             body_items = body.split(' ')
-            if len(body_items) >= 6:
+            if len(body_items) >= 7:
                 callsign = body_items[0]
                 program = body_items[1]
                 site = body_items[2]
                 frequency_mhz = body_items[3]
                 mode = body_items[4]
-                comments = " ".join(body_items[5:])
-                comments = comments.split('- ')[0].rstrip()  # remove the sender's name that postfixes the inReach message
                 if mode in valid_modes:
-                    # add it to the list
-                    msgs.append({'sender_number':sender_number, 'sent_date':sent_date, 'sent_time':sent_time, 'callsign':callsign, 'program':program, 'site':site, 'frequency_mhz':frequency_mhz, 'mode':mode, 'comments':comments})
-                    print('adding: {}'.format(msgs[-1]))
+                    token = body_items[5]
+                    if token in users_df.token.to_list():
+                        comments = " ".join(body_items[6:])
+                        comments = comments.split('- ')[0].rstrip()  # remove the sender's name that postfixes the inReach message
+                        # add it to the list
+                        msgs.append({'sender_number':sender_number, 'sent_date':sent_date, 'sent_time':sent_time, 'callsign':callsign, 'program':program, 'site':site, 'frequency_mhz':frequency_mhz, 'mode':mode, 'comments':comments})
+                        print('adding: {}'.format(msgs[-1]))
+                    else:
+                        print('invalid token: {}'.format(token))
                 else:
-                    print('invalid message: {}'.format(msgs[-1]))
+                    print('invalid mode: {}'.format(mode))
             else:
                 print('invalid body: {}'.format(body))
         else:
