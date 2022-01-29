@@ -25,6 +25,7 @@ For example:
 
 `VK3MCB/P WWFF VKFF-0556 7.032 CW 46de2f8b39 Last calls rain approaching`
 
+The spot will then appear on the [PnP Current Spots](https://parksnpeaks.org/index.php) page.
 
 
 #### Command line arguments
