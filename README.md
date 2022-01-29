@@ -15,7 +15,7 @@ CREATE TABLE "users" (
 )
 ```
 
-The token is an MD5 hash (truncated) of the user's email address, and this token must be provided in the inReach message.
+The token is an MD5 hash (truncated) of the user's email address, and this token must be provided in the inReach message. A simple token generator is in the `psg generate hash` Jupyter notebook.
 
 The format of the inReach to the SIM's mobile number is:
 
