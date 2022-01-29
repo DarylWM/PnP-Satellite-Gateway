@@ -4,6 +4,29 @@ The PnP-Satellite-Gateway is a combination of off-the-shelf hardware and custom 
 
 The software runs every N minutes as a `cron` job. It polls the 4G LTE module to find out if it has received any messages. If so, it performs some checks to make sure the message of the correct format, and extracts the information required to post a spot on PnP through the PnP API.
 
+Only messages from users registered with the PnP-Satellite-Gateway are accepted and posted to PnP. User registrations are stored in a SQLite database. The schema is shown below.
+
+```
+CREATE TABLE "users" (
+	"email"	TEXT NOT NULL,
+	"token"	TEXT NOT NULL,
+	"callsign"	TEXT,
+	PRIMARY KEY("email")
+)
+```
+
+The token is an MD5 hash (truncated) of the user's email address, and this token must be provided in the inReach message.
+
+The format of the inReach to the SIM's mobile number is:
+
+<my call> <program> <program site ID> <frequency> <mode> <token> <free text message>
+
+For example:
+
+VK3MCB/P WWFF VKFF-0556 7.032 CW 46de2f8b39 Last calls rain approaching
+
+
+### Command line arguments
 
 | short form | long form | type | meaning | required |
 | ---------- | --------- | ---- | ------- | -------- |
