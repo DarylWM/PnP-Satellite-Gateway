@@ -4,7 +4,7 @@ The PnP-Satellite-Gateway is a combination of off-the-shelf hardware and custom 
 
 The software runs every N minutes as a `cron` job. It polls the 4G LTE module to find out if it has received any messages. If there are new messages, it performs some checks to make sure the message is from a registered user and in the correct format, and extracts the information required to post a spot on PnP through the PnP API.
 
-Only messages from users registered with the PnP-Satellite-Gateway are accepted and posted to PnP. User registrations are stored in a SQLite database. The schema for the database is shown below. To create the table and insert the registered users (needs at least one user), it's easiest to use a database browser like [DB Browser for SQLite](https://sqlitebrowser.org). Another option is running `sqlite` on the command line.
+Only messages from users registered with the PnP-Satellite-Gateway are accepted and posted to PnP. User registrations are stored in a SQLite database called `psg-users.sqlite` and located in the directory specified in the command line arguments. The schema for the database is shown below. To create the table and insert the registered users (needs at least one user), I find it easiest to use a database browser like [DB Browser for SQLite](https://sqlitebrowser.org). Another option is running `sqlite` on the command line.
 
 ```
 CREATE TABLE "users" (
