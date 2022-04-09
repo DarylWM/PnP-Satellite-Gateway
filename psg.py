@@ -139,6 +139,8 @@ headers = {
 print('sending {} messages to {}'.format(len(msgs), pnp_url))
 for idx,m in enumerate(msgs):
     r = requests.post(pnp_url, headers=headers, json={'actClass':m['program'], 'actCallsign':m['callsign'], 'actSite':['site'], 'mode':m['mode'], 'freq':m['frequency_mhz'], 'comments':m['comments'], 'userID':args.pnp_api_user_name, 'APIKey':args.pnp_api_key})
+    if args.debug_mode:
+        print(r.text)
     if r.status_code == 200:
         print('message {} was successfully submitted'.format(idx+1))
     else:
