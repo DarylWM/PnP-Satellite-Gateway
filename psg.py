@@ -129,10 +129,16 @@ print('delete all messages: {}'.format(getResponse(gsm_ser)[0].rstrip().decode("
 print('closing the serial connection')
 gsm_ser.close()
 
+# set up the request header
+headers = {
+    'User-Agent': 'curl/7.77.0',
+    'Content-Type': 'application/json'
+}
+
 # send the messages to PnP
 print('sending {} messages to {}'.format(len(msgs), pnp_url))
 for idx,m in enumerate(msgs):
-    r = requests.post(pnp_url, json={'actClass':m['program'], 'actCallsign':m['callsign'], 'actSite':['site'], 'mode':m['mode'], 'freq':m['frequency_mhz'], 'comments':m['comments'], 'userID':args.pnp_api_user_name, 'APIKey':args.pnp_api_key})
+    r = requests.post(pnp_url, headers=headers, json={'actClass':m['program'], 'actCallsign':m['callsign'], 'actSite':['site'], 'mode':m['mode'], 'freq':m['frequency_mhz'], 'comments':m['comments'], 'userID':args.pnp_api_user_name, 'APIKey':args.pnp_api_key})
     if r.status_code == 200:
         print('message {} was successfully submitted'.format(idx+1))
     else:
