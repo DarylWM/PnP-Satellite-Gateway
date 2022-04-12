@@ -23,7 +23,6 @@ parser.add_argument('-u','--pnp_api_user_name', type=str, help='API user name fo
 parser.add_argument('-k','--pnp_api_key', type=str, help='API key for the submission.', required=True)
 parser.add_argument('-url','--pnp_api_url', type=str, help='API URL to use.', required=True)
 parser.add_argument('-db','--users_db_dir', type=str, help='Directory of the users database.', required=True)
-parser.add_argument('-debug','--debug_mode', action='store_true', help='Post to PnP as a debug message.')
 args = parser.parse_args()
 
 valid_modes = ['SSB','CW','AM','FM','DATA','PSK','RTTY']
@@ -34,13 +33,12 @@ if not os.path.isfile(USERS_DB_NAME):
     print("The users database is required but doesn't exist: {}".format(USERS_DB_NAME))
     sys.exit(1)
 
-# load the metrics for the extracted features
+# load the registered users
 db_conn = sqlite3.connect(USERS_DB_NAME)
 # read the users
 users_df = pd.read_sql_query('select email,token from users', db_conn)
 db_conn.close()
 print("loaded {} users from {}".format(len(users_df), USERS_DB_NAME))
-
 
 # set up the serial connection
 gsm_ser = serial.Serial()
@@ -67,17 +65,15 @@ print('check registration on the network: {}'.format(getResponse(gsm_ser)))
 
 # put into text mode
 gsm_ser.write('AT+CMGF=1\r'.encode('utf-8'))
-print('set text mode: {}'.format(getResponse(gsm_ser)[0].rstrip().decode("utf-8")))
+resp = getResponse(gsm_ser)
+if len(resp) > 0:
+    print('set text mode: {}'.format(resp[0].rstrip().decode("utf-8")))
 
 # show text mode parameters
 gsm_ser.write('AT+CSDH=1\r'.encode('utf-8'))
-print('show extra parameters: {}'.format(getResponse(gsm_ser)[0].rstrip().decode("utf-8")))
-
-# set the PnP URL
-if args.debug_mode:
-    pnp_url = '{}/DEBUG'.format(args.pnp_api_url)
-else:
-    pnp_url = args.pnp_api_url
+resp = getResponse(gsm_ser)
+if len(resp) > 0:
+    print('show extra parameters: {}'.format(resp[0].rstrip().decode("utf-8")))
 
 # read all messages
 print('reading messages')
@@ -138,10 +134,16 @@ headers = {
 # send the messages to PnP
 print('sending {} messages to {}'.format(len(msgs), pnp_url))
 for idx,m in enumerate(msgs):
+    # set the PnP URL
+    if 'debug' in m['comments']:
+        pnp_url = '{}/DEBUG'.format(args.pnp_api_url)
+    else:
+        pnp_url = args.pnp_api_url
+    # post the spot
     r = requests.post(pnp_url, headers=headers, json={'actClass':m['program'], 'actCallsign':m['callsign'], 'actSite':['site'], 'mode':m['mode'], 'freq':m['frequency_mhz'], 'comments':m['comments'], 'userID':args.pnp_api_user_name, 'APIKey':args.pnp_api_key})
-    if args.debug_mode:
-        print(r.text)
+    print(r.text)
     if r.status_code == 200:
         print('message {} was successfully submitted'.format(idx+1))
     else:
         print('message {} submission failed'.format(idx+1))
+    print('------------------------------------------------')
