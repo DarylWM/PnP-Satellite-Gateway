@@ -132,7 +132,7 @@ headers = {
 }
 
 # send the messages to PnP
-print('sending {} messages to {}'.format(len(msgs), pnp_url))
+print('sending {} messages to PnP'.format(len(msgs)))
 for idx,m in enumerate(msgs):
     # set the PnP URL
     if 'debug' in m['comments']:
