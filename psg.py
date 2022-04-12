@@ -82,7 +82,7 @@ msg = getResponse(gsm_ser)
 if len(msg) == 0:
     print("no messages found")
 else:
-    print('reading {} messages'.format(len(msg)))
+    print('reading messages')
 
 for idx,m in enumerate(msg):
     m_str = m.rstrip().decode("utf-8")
