@@ -76,10 +76,14 @@ if len(resp) > 0:
     print('show extra parameters: {}'.format(resp[0].rstrip().decode("utf-8")))
 
 # read all messages
-print('reading messages')
 msgs = []
 gsm_ser.write('AT+CMGL="ALL"\r'.encode('utf-8'))
 msg = getResponse(gsm_ser)
+if len(msg) == 0:
+    print("no messages found")
+else:
+    print('reading {} messages'.format(len(msg)))
+
 for idx,m in enumerate(msg):
     m_str = m.rstrip().decode("utf-8")
     if 'CMGL:' in m_str:
