@@ -123,7 +123,9 @@ print()
 
 # delete all messages
 gsm_ser.write('AT+CMGD=,4\r'.encode('utf-8'))
-print('clear message buffer: {}'.format(getResponse(gsm_ser)[0].rstrip().decode("utf-8")))
+resp = getResponse(gsm_ser)
+if len(resp) > 0:
+    print('clear message buffer: {}'.format(resp[0].rstrip().decode("utf-8")))
 
 # close the connection
 print('closing the serial connection')
