@@ -34,7 +34,7 @@ if not os.path.isfile(USERS_DB_NAME):
     sys.exit(1)
 
 d = datetime.datetime.now()
-print('running at {}'.format(d.strftime("%Y-%m-%d-%H-%M-%S")))
+print('running at {}'.format(d.strftime("%Y-%m-%d %H:%M:%S")))
 
 # load the registered users
 db_conn = sqlite3.connect(USERS_DB_NAME)
@@ -122,7 +122,6 @@ for idx,m in enumerate(msg):
                 print('invalid body: {}'.format(body))
         else:
             print('invalid header: {}'.format(header))
-print()
 
 # delete all messages
 gsm_ser.write('AT+CMGD=,4\r'.encode('utf-8'))
