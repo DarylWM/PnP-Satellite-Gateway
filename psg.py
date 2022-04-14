@@ -1,11 +1,11 @@
 import serial
-import time
 import sys
 import requests
 import argparse
 import os
 import sqlite3
 import pandas as pd
+import datetime
 
 
 def getResponse(ser):
@@ -32,6 +32,9 @@ USERS_DB_NAME = "{}/psg-users.sqlite".format(args.users_db_dir)
 if not os.path.isfile(USERS_DB_NAME):
     print("The users database is required but doesn't exist: {}".format(USERS_DB_NAME))
     sys.exit(1)
+
+d = datetime.datetime.now()
+print('running at {}'.format(d.strftime("%Y-%m-%d-%H-%M-%S")))
 
 # load the registered users
 db_conn = sqlite3.connect(USERS_DB_NAME)
@@ -146,10 +149,13 @@ for idx,m in enumerate(msgs):
     else:
         pnp_url = args.pnp_api_url
     # post the spot
-    r = requests.post(pnp_url, headers=headers, json={'actClass':m['program'], 'actCallsign':m['callsign'], 'actSite':['site'], 'mode':m['mode'], 'freq':m['frequency_mhz'], 'comments':m['comments'], 'userID':args.pnp_api_user_name, 'APIKey':args.pnp_api_key})
-    print(r.text)
+    jsonHeader = {'actClass':m['program'], 'actCallsign':m['callsign'], 'actSite':m['site'], 'mode':m['mode'], 'freq':m['frequency_mhz'], 'comments':m['comments'], 'userID':args.pnp_api_user_name, 'APIKey':args.pnp_api_key}
+    print('sending to {}: {}'.format(pnp_url, jsonHeader))
+    r = requests.post(pnp_url, headers=headers, json=jsonHeader)
+    print('response: {}'.format(r.text))
     if r.status_code == 200:
         print('message {} was successfully submitted'.format(idx+1))
     else:
         print('message {} submission failed'.format(idx+1))
     print('------------------------------------------------')
+print()
