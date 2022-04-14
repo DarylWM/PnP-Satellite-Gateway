@@ -142,6 +142,7 @@ headers = {
 # send the messages to PnP
 print('sending {} messages to PnP'.format(len(msgs)))
 for idx,m in enumerate(msgs):
+    print("message {}".format(idx+1))
     # set the PnP URL
     if 'debug' in m['comments']:
         pnp_url = '{}/DEBUG'.format(args.pnp_api_url)
@@ -151,10 +152,9 @@ for idx,m in enumerate(msgs):
     jsonHeader = {'actClass':m['program'], 'actCallsign':m['callsign'], 'actSite':m['site'], 'mode':m['mode'], 'freq':m['frequency_mhz'], 'comments':m['comments'], 'userID':args.pnp_api_user_name, 'APIKey':args.pnp_api_key}
     print('sending to {}: {}'.format(pnp_url, jsonHeader))
     r = requests.post(pnp_url, headers=headers, json=jsonHeader)
-    print('response: {}'.format(r.text))
+    print('response: {}\n'.format(r.text))
     if r.status_code == 200:
         print('message {} was successfully submitted'.format(idx+1))
     else:
         print('message {} submission failed'.format(idx+1))
-    print('------------------------------------------------')
 print()
